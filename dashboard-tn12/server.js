@@ -211,6 +211,23 @@ const server = http.createServer(async (req, res) => {
         res.end(html);
         return;
     }
+    
+    // Serve favicon
+    if (urlPath.startsWith('/favicon/')) {
+        const fs = require('fs');
+        const faviconPath = '/Users/4dsto/ktn12/favicon' + urlPath.replace('/favicon', '');
+        try {
+            const ext = urlPath.split('.').pop();
+            const types = { 'ico': 'image/x-icon', 'png': 'image/png', 'svg': 'image/svg+xml', 'webmanifest': 'application/json' };
+            const content = fs.readFileSync(faviconPath);
+            res.writeHead(200, { 'Content-Type': types[ext] || 'text/plain' });
+            res.end(content);
+        } catch(e) {
+            res.writeHead(404);
+            res.end('Not found');
+        }
+        return;
+    }
 
     const getQueryParam = (name) => {
         const params = queryString.split('&');

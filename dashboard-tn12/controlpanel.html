@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KASPA TN12 Control Panel</title>
+    <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico">
     <style>
         :root {
             --bg-primary: #000000;
@@ -245,8 +246,11 @@
             <h1>KASPA TN12 Control Panel</h1>
         </div>
         <div class="header-stats">
+            Kaspad: <span id="hKaspad">-</span> |
+            Miner: <span id="hMiner">-</span> |
+            Rothschild: <span id="hRothschild">-</span> |
+            UTXO: <span id="hUtxo">-</span> |
             Peers: <span id="hPeers">-</span> |
-            TPS: <span id="hTps">-</span> |
             Blocks: <span id="hBlocks">-</span> |
             Sync: <span id="hSync">-</span>
         </div>
@@ -267,7 +271,6 @@
                     <button class="chip-btn stop" onclick="runCmd('kaspad-stop')">■ Stop</button>
                     <button class="chip-btn" onclick="runCmd('kaspad-restart')">↻ Restart</button>
                     <button class="chip-btn" onclick="runCmd('kaspad-status')">Status</button>
-                    <button class="chip-btn" onclick="runCmd('kaspad-log')">Log</button>
                 </div>
             </div>
             
@@ -281,6 +284,7 @@
                     <button class="chip-btn start" onclick="runCmd('miner-start')">▶ Start</button>
                     <button class="chip-btn stop" onclick="runCmd('miner-stop')">■ Stop</button>
                     <button class="chip-btn" onclick="runCmd('miner-status')">Status</button>
+                    <button class="chip-btn" onclick="checkKaspadStatus()" style="background: #004488;">Kaspad</button>
                 </div>
             </div>
             
@@ -387,13 +391,15 @@
                 <div class="console-header">
                     <span class="console-title" id="consoleTitle">Console Output</span>
                     <div class="console-tabs">
-                        <button class="console-tab active" onclick="clearConsole()">Clear</button>
+                        <button class="console-tab" onclick="checkKaspadStatus()" style="background: #004488; margin-right: 8px;">Check Kaspad</button>
+                        <button class="console-tab" onclick="clearConsole()">Clear</button>
                     </div>
                 </div>
                 <div class="console-box" id="consoleOutput">
                     <div class="console-line info">Welcome to KASPA TN12 Control Panel</div>
                     <div class="console-line info">Select a command from the sidebar...</div>
                 </div>
+                <div id="debugLogs" style="display:none; height: 80px; overflow-y: auto; font-size: 10px; color: var(--text-muted); padding: 8px; background: #111;"></div>
             </div>
             
             <!-- PANELS -->
@@ -542,6 +548,28 @@
             setInterval(refreshStats, 10000);
         };
         
+        // Check Kaspad Status (like Debug panel)
+        async function checkKaspadStatus() {
+            try {
+                const resp = await fetch('/api/rpc', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ method: 'get_block_dag_info', params: [] })
+                });
+                const data = await resp.json();
+                clearConsole();
+                log('info', '=== KASPAD STATUS ===');
+                log('info', 'Blocks: ' + data.blockCount);
+                log('info', 'Headers: ' + data.headerCount);
+                log('info', 'DAA Score: ' + data.virtualDaaScore);
+                log('info', 'Difficulty: ' + Math.round(data.difficulty));
+                log('info', 'Network: ' + data.networkName);
+                log('info', 'Synced: ' + (data.blockCount === data.headerCount ? 'YES' : 'NO'));
+            } catch(e) {
+                log('error', 'Error: ' + e.message);
+            }
+        }
+        
         // Toggle Sidebar Section
         function toggleSection(el) {
             el.classList.toggle('collapsed');
@@ -575,7 +603,7 @@
             document.getElementById('consoleTitle').textContent = type.toUpperCase() + ' Log';
             
             const lines = type === 'kaspad' ? 30 : 20;
-            const file = type === 'kaspad' ? 'kaspad.log' : type === 'miner' ? 'miner.log' : 'rothschild.log';
+            const file = type === 'kaspad' ? '/Users/4dsto/ktn12/kaspad.log' : type === 'miner' ? '/Users/4dsto/ktn12/miner.log' : '/Users/4dsto/ktn12/rothschild.log';
             
             try {
                 const resp = await fetch('/api/shell', {
@@ -649,8 +677,20 @@
                     const data = await resp.json();
                     log('json', JSON.stringify(data, null, 2));
                 }
-                else if (cmd === 'kaspad-log') {
-                    showLog('kaspad');
+                else if (cmd === 'kaspad-status') {
+                    try {
+                        const resp = await fetch('/api/shell', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ cmd: 'tail -3 /Users/4dsto/ktn12/kaspad.log' })
+                        });
+                        const data = await resp.json();
+                        clearConsole();
+                        log('info', '=== KASPAD STATUS ===');
+                        (data.stdout || '').split('\n').forEach(line => log('info', line));
+                    } catch(e) {
+                        log('error', 'Error: ' + e.message);
+                    }
                 }
                 else if (cmd === 'system-info') {
                     const resp = await fetch('/api/system-info');
@@ -908,16 +948,25 @@
         // Refresh Stats
         async function refreshStats() {
             try {
-                const [serviceResp, nodeResp] = await Promise.all([
+                const [serviceResp, nodeResp, sysResp] = await Promise.all([
                     fetch('/api/service-status'),
-                    fetch('/api/node-status')
+                    fetch('/api/node-status'),
+                    fetch('/api/system-info')
                 ]);
                 const services = await serviceResp.json();
                 const node = await nodeResp.json();
+                const sys = await sysResp.json();
                 
                 // Header stats
+                document.getElementById('hKaspad').textContent = services.kaspad || '-';
+                document.getElementById('hKaspad').style.color = services.kaspad === 'running' ? 'var(--accent)' : 'var(--error)';
+                document.getElementById('hMiner').textContent = services.miner || '-';
+                document.getElementById('hMiner').style.color = services.miner === 'running' ? 'var(--accent)' : 'var(--error)';
+                document.getElementById('hRothschild').textContent = services.rothschild || '-';
+                document.getElementById('hRothschild').style.color = services.rothschild === 'running' ? 'var(--accent)' : 'var(--error)';
+                document.getElementById('hUtxo').textContent = node.utxoIndex === true ? '✓' : '✗';
+                document.getElementById('hUtxo').style.color = node.utxoIndex === true ? 'var(--accent)' : 'var(--error)';
                 document.getElementById('hPeers').textContent = node.peers || '-';
-                document.getElementById('hTps').textContent = node.tps || '-';
                 document.getElementById('hBlocks').textContent = node.blocks || '-';
                 document.getElementById('hSync').textContent = node.syncPercent || '0%';
                 

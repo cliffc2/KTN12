@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KASPA TN12 Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico">
     <style>
         :root {
             --bg-primary: #000000;
@@ -85,7 +86,7 @@
         .console-input:focus { outline: none; }
         
         .cmd-line { color: var(--accent); margin-bottom: 8px; }
-        .output-line { color: var(--text-muted); margin-bottom: 4px; }
+        .output-line { color: #00ff00; margin-bottom: 4px; }
         .error-line { color: var(--error); }
         .success-line { color: var(--accent); }
         
@@ -167,6 +168,9 @@
         <div class="main-section">
             <div class="cmd-sidebar" id="cmdSidebar">
                 <div class="card-title" style="padding:0 0 12px 0">4 Commands</div>
+                <button class="chip-btn" onclick="checkKaspadConsole()" style="background: #000; color: #fff; margin-bottom: 12px;">check kaspad status</button>
+                <button class="chip-btn" onclick="restartKaspad()" style="background: #880000; color: #fff; margin-bottom: 12px;">restart kaspad</button>
+                <button class="chip-btn" onclick="checkMinerConsole()" style="background: #884400; color: #fff; margin-bottom: 12px;">check miner</button>
             </div>
             
             <div class="params-panel">
@@ -700,7 +704,7 @@
         
         const CATEGORIES = {
             'WALLET': ['generate', 'load', 'send'],
-            'MINING': ['kaspad-log', 'miner-status', 'miner-start', 'rothschild-start', 'rothschild-stop'],
+            'MINING': ['miner-status', 'miner-start', 'rothschild-start', 'rothschild-stop'],
             'SILVERSCRIPT': ['silver-compile', 'silver-list'],
             'CONTRACTS': ['p2pkh', 'multisig', 'escrow', 'hodl', 'mecenas'],
             'COMPILER': ['compile', 'deploy']
@@ -743,11 +747,6 @@
                 desc: 'Get miner status', 
                 params: [],
                 action: () => checkMinerStatus()
-            },
-            'kaspad-log': { 
-                desc: 'Show kaspad log', 
-                params: [],
-                action: () => showKaspadLog()
             },
             'miner-start': { 
                 desc: 'Toggle CPU miner', 
@@ -1094,6 +1093,43 @@
             } catch(e) {
                 const logEl = document.getElementById('debugLogs');
                 if (logEl) logEl.textContent = 'Error: ' + e.message;
+            }
+        }
+        
+        async function checkKaspadConsole() {
+            try {
+                const resp = await fetch('/api/rpc', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ method: 'get_block_dag_info', params: [] })
+                });
+                const data = await resp.json();
+                clearConsole();
+                log('=== KASPAD STATUS ===');
+                log('Blocks: ' + data.blockCount);
+                log('Headers: ' + data.headerCount);
+                log('DAA Score: ' + data.virtualDaaScore);
+                log('Difficulty: ' + Math.round(data.difficulty));
+                log('Network: ' + data.networkName);
+                log('Synced: ' + (data.blockCount === data.headerCount ? 'YES' : 'NO'));
+            } catch(e) {
+                log('Error: ' + e.message, 'error');
+            }
+        }
+        
+        async function checkMinerConsole() {
+            try {
+                const resp = await fetch('/api/miner-status');
+                const data = await resp.json();
+                clearConsole();
+                log('=== MINER STATUS ===');
+                log('Running: ' + (data.running ? 'YES' : 'NO'));
+                log('Hashrate: ' + data.hashrate);
+                log('UTXO Sync: ' + data.utxoSync);
+                log('Accepted: ' + data.accepted);
+                log('Rejected: ' + data.rejected);
+            } catch(e) {
+                log('Error: ' + e.message, 'error');
             }
         }
         
