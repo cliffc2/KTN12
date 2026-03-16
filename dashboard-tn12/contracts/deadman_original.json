@@ -1,0 +1,609 @@
+{
+  "contract_name": "DeadmanSwitch",
+  "script": [
+    118,
+    0,
+    156,
+    99,
+    117,
+    0,
+    121,
+    32,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    172,
+    105,
+    0,
+    194,
+    0,
+    160,
+    105,
+    117,
+    81,
+    103,
+    118,
+    81,
+    156,
+    99,
+    117,
+    0,
+    121,
+    32,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    172,
+    105,
+    4,
+    128,
+    51,
+    225,
+    1,
+    177,
+    0,
+    195,
+    32,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    3,
+    0,
+    0,
+    32,
+    124,
+    126,
+    1,
+    172,
+    126,
+    135,
+    105,
+    0,
+    194,
+    185,
+    190,
+    156,
+    105,
+    117,
+    81,
+    103,
+    118,
+    82,
+    156,
+    99,
+    117,
+    0,
+    121,
+    32,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    172,
+    105,
+    0,
+    195,
+    32,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    3,
+    0,
+    0,
+    32,
+    124,
+    126,
+    1,
+    172,
+    126,
+    135,
+    105,
+    0,
+    194,
+    185,
+    190,
+    156,
+    105,
+    117,
+    81,
+    103,
+    117,
+    0,
+    105,
+    104,
+    104,
+    104
+  ],
+  "ast": {
+    "name": "DeadmanSwitch",
+    "params": [
+      {
+        "type_name": "pubkey",
+        "name": "owner"
+      },
+      {
+        "type_name": "pubkey",
+        "name": "beneficiary"
+      },
+      {
+        "type_name": "int",
+        "name": "timeoutPeriod"
+      }
+    ],
+    "constants": {},
+    "functions": [
+      {
+        "name": "heartbeat",
+        "params": [
+          {
+            "type_name": "sig",
+            "name": "ownerSig"
+          }
+        ],
+        "entrypoint": true,
+        "return_types": [],
+        "body": [
+          {
+            "kind": "require",
+            "data": {
+              "expr": {
+                "kind": "call",
+                "data": {
+                  "name": "checkSig",
+                  "args": [
+                    {
+                      "kind": "identifier",
+                      "data": "ownerSig"
+                    },
+                    {
+                      "kind": "identifier",
+                      "data": "owner"
+                    }
+                  ]
+                }
+              },
+              "message": null
+            }
+          },
+          {
+            "kind": "require",
+            "data": {
+              "expr": {
+                "kind": "binary",
+                "data": {
+                  "op": "gt",
+                  "left": {
+                    "kind": "introspection",
+                    "data": {
+                      "kind": "output_value",
+                      "index": {
+                        "kind": "int",
+                        "data": 0
+                      }
+                    }
+                  },
+                  "right": {
+                    "kind": "int",
+                    "data": 0
+                  }
+                }
+              },
+              "message": null
+            }
+          }
+        ]
+      },
+      {
+        "name": "claim",
+        "params": [
+          {
+            "type_name": "sig",
+            "name": "beneficiarySig"
+          }
+        ],
+        "entrypoint": true,
+        "return_types": [],
+        "body": [
+          {
+            "kind": "require",
+            "data": {
+              "expr": {
+                "kind": "call",
+                "data": {
+                  "name": "checkSig",
+                  "args": [
+                    {
+                      "kind": "identifier",
+                      "data": "beneficiarySig"
+                    },
+                    {
+                      "kind": "identifier",
+                      "data": "beneficiary"
+                    }
+                  ]
+                }
+              },
+              "message": null
+            }
+          },
+          {
+            "kind": "time_op",
+            "data": {
+              "tx_var": "this_age",
+              "expr": {
+                "kind": "identifier",
+                "data": "timeoutPeriod"
+              },
+              "message": null
+            }
+          },
+          {
+            "kind": "variable_definition",
+            "data": {
+              "type_name": "bytes34",
+              "modifiers": [],
+              "name": "dest",
+              "expr": {
+                "kind": "new",
+                "data": {
+                  "name": "LockingBytecodeP2PK",
+                  "args": [
+                    {
+                      "kind": "identifier",
+                      "data": "beneficiary"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "require",
+            "data": {
+              "expr": {
+                "kind": "binary",
+                "data": {
+                  "op": "eq",
+                  "left": {
+                    "kind": "introspection",
+                    "data": {
+                      "kind": "output_locking_bytecode",
+                      "index": {
+                        "kind": "int",
+                        "data": 0
+                      }
+                    }
+                  },
+                  "right": {
+                    "kind": "identifier",
+                    "data": "dest"
+                  }
+                }
+              },
+              "message": null
+            }
+          },
+          {
+            "kind": "require",
+            "data": {
+              "expr": {
+                "kind": "binary",
+                "data": {
+                  "op": "eq",
+                  "left": {
+                    "kind": "introspection",
+                    "data": {
+                      "kind": "output_value",
+                      "index": {
+                        "kind": "int",
+                        "data": 0
+                      }
+                    }
+                  },
+                  "right": {
+                    "kind": "introspection",
+                    "data": {
+                      "kind": "input_value",
+                      "index": {
+                        "kind": "nullary",
+                        "data": "active_input_index"
+                      }
+                    }
+                  }
+                }
+              },
+              "message": null
+            }
+          }
+        ]
+      },
+      {
+        "name": "cancel",
+        "params": [
+          {
+            "type_name": "sig",
+            "name": "ownerSig"
+          }
+        ],
+        "entrypoint": true,
+        "return_types": [],
+        "body": [
+          {
+            "kind": "require",
+            "data": {
+              "expr": {
+                "kind": "call",
+                "data": {
+                  "name": "checkSig",
+                  "args": [
+                    {
+                      "kind": "identifier",
+                      "data": "ownerSig"
+                    },
+                    {
+                      "kind": "identifier",
+                      "data": "owner"
+                    }
+                  ]
+                }
+              },
+              "message": null
+            }
+          },
+          {
+            "kind": "variable_definition",
+            "data": {
+              "type_name": "bytes34",
+              "modifiers": [],
+              "name": "dest",
+              "expr": {
+                "kind": "new",
+                "data": {
+                  "name": "LockingBytecodeP2PK",
+                  "args": [
+                    {
+                      "kind": "identifier",
+                      "data": "owner"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "require",
+            "data": {
+              "expr": {
+                "kind": "binary",
+                "data": {
+                  "op": "eq",
+                  "left": {
+                    "kind": "introspection",
+                    "data": {
+                      "kind": "output_locking_bytecode",
+                      "index": {
+                        "kind": "int",
+                        "data": 0
+                      }
+                    }
+                  },
+                  "right": {
+                    "kind": "identifier",
+                    "data": "dest"
+                  }
+                }
+              },
+              "message": null
+            }
+          },
+          {
+            "kind": "require",
+            "data": {
+              "expr": {
+                "kind": "binary",
+                "data": {
+                  "op": "eq",
+                  "left": {
+                    "kind": "introspection",
+                    "data": {
+                      "kind": "output_value",
+                      "index": {
+                        "kind": "int",
+                        "data": 0
+                      }
+                    }
+                  },
+                  "right": {
+                    "kind": "introspection",
+                    "data": {
+                      "kind": "input_value",
+                      "index": {
+                        "kind": "nullary",
+                        "data": "active_input_index"
+                      }
+                    }
+                  }
+                }
+              },
+              "message": null
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "abi": [
+    {
+      "name": "heartbeat",
+      "inputs": [
+        {
+          "name": "ownerSig",
+          "type_name": "sig"
+        }
+      ]
+    },
+    {
+      "name": "claim",
+      "inputs": [
+        {
+          "name": "beneficiarySig",
+          "type_name": "sig"
+        }
+      ]
+    },
+    {
+      "name": "cancel",
+      "inputs": [
+        {
+          "name": "ownerSig",
+          "type_name": "sig"
+        }
+      ]
+    }
+  ],
+  "without_selector": false
+}
