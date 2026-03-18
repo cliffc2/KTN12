@@ -1,4 +1,4 @@
-# Stroemnet - Kaspa ↔ ETH Atomic Swap
+# Kaspa ↔ ETH Atomic Swap 
 
 A production-grade Kaspa ↔ Ethereum atomic swap webapp based on the Stroemnet protocol.
 
